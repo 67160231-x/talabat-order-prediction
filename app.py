@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import pickle
 import os
+import plotly.graph_objects as go
 
 # --- 1. หน้าตาเว็บแบบมินิมอล ---
 st.set_page_config(
@@ -92,3 +93,42 @@ if predict_btn:
         st.error("Model Error: ระบบหาไฟล์โมเดลไม่เจอ โปรดตรวจสอบว่ามีไฟล์ best_model.pkl อยู่ใน GitHub")
 
 st.markdown("<p style='text-align: center; color: #BBB; font-size: 1rem; margin-top: 60px;'>AI-Powered Prediction Platform</p>", unsafe_allow_html=True)
+
+# --- ฟังก์ชันสร้างเกจวัดความเสี่ยง ---
+def create_gauge(risk_val):
+    fig = go.Figure(go.Indicator(
+        mode = "gauge+number",
+        value = risk_val,
+        domain = {'x': [0, 1], 'y': [0, 1]},
+        title = {'text': "ระดับความเสี่ยง (%)", 'font': {'size': 24}},
+        gauge = {
+            'axis': {'range': [None, 100], 'tickwidth': 1},
+            'bar': {'color': "#FF416C"},
+            'steps': [
+                {'range': [0, 30], 'color': "#e8f5e9"},
+                {'range': [30, 70], 'color': "#fff3e0"},
+                {'range': [70, 100], 'color': "#ffebee"}
+            ],
+            'threshold': {
+                'line': {'color': "red", 'width': 4},
+                'thickness': 0.75,
+                'value': 70}
+        }
+    ))
+    fig.update_layout(height=300, margin=dict(l=20, r=20, t=50, b=20))
+    return fig
+
+# --- แก้ไขในส่วนแสดงผลลัพธ์ (หลังทำนายเสร็จ) ---
+if predict_btn:
+    if model is not None:
+        # ... (โค้ดทำนายเดิมของคุณ) ...
+        
+        # แสดงกราฟเกจวัด
+        st.plotly_chart(create_gauge(risk_percent), use_container_width=True)
+
+        # เพิ่มข้อความแนะนำ (Dynamic Insights)
+        with st.expander("🔍 วิเคราะห์เจาะลึก"):
+            st.write(f"ผลวิเคราะห์ชี้ว่าออเดอร์นี้มีความเสี่ยงเนื่องจาก:")
+            if dist > 10: st.write("- 📍 ระยะทางค่อนข้างไกล")
+            if traffic == "High": st.write("- 🚦 สภาพจราจรติดขัดมาก")
+            if hour > 20 or hour < 6: st.write("- ⏰ เป็นช่วงเวลาที่ไรเดอร์อาจจะน้อย")
