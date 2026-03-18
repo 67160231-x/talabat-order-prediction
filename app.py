@@ -57,13 +57,25 @@ st.markdown("""
     """, unsafe_allow_html=True)
 
 # --- 3. โหลดโมเดล (Silent Load) ---
+# --- 3. โหลดโมเดล (ปรับปรุงให้หาไฟล์ง่ายขึ้น) ---
 @st.cache_resource
 def load_model():
-    try:
-        with open('models/best_model.pkl', 'rb') as f:
-            return pickle.load(f)
-    except:
-        return None
+    import os
+    # ลองหาไฟล์ในหลายๆ จุดที่อาจจะเป็นไปได้
+    possible_paths = [
+        'models/best_model.pkl',           # กรณีรันจากโฟลเดอร์หลัก
+        'best_model.pkl',                  # กรณีไฟล์อยู่ในโฟลเดอร์เดียวกับ app.py
+        os.path.join(os.path.dirname(__file__), 'models', 'best_model.pkl') # พาธสัมพัทธ์
+    ]
+    
+    for path in possible_paths:
+        if os.path.exists(path):
+            try:
+                with open(path, 'rb') as f:
+                    return pickle.load(f)
+            except:
+                continue
+    return None
 
 model = load_model()
 
