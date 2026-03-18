@@ -61,23 +61,15 @@ st.markdown("""
 @st.cache_resource
 def load_model():
     import os
-    # ลองหาไฟล์ในหลายๆ จุดที่อาจจะเป็นไปได้
-    possible_paths = [
-        'models/best_model.pkl',           # กรณีรันจากโฟลเดอร์หลัก
-        'best_model.pkl',                  # กรณีไฟล์อยู่ในโฟลเดอร์เดียวกับ app.py
-        os.path.join(os.path.dirname(__file__), 'models', 'best_model.pkl') # พาธสัมพัทธ์
-    ]
+    import pickle
+    # หาไฟล์ที่วางอยู่ข้างๆ app.py เลย
+    base_path = os.path.dirname(__file__)
+    model_path = os.path.join(base_path, 'best_model.pkl')
     
-    for path in possible_paths:
-        if os.path.exists(path):
-            try:
-                with open(path, 'rb') as f:
-                    return pickle.load(f)
-            except:
-                continue
+    if os.path.exists(model_path):
+        with open(model_path, 'rb') as f:
+            return pickle.load(f)
     return None
-
-model = load_model()
 
 # --- 4. ส่วนหัวข้อ (ขยายใหญ่) ---
 st.markdown("<h1 style='text-align: center; color: #1E1E1E; font-size: 3rem; margin-bottom: 0;'>🥡 Order Analysis</h1>", unsafe_allow_html=True)
